@@ -71,11 +71,38 @@ func computeDistance(left, right []int) int {
 	return totalDistance
 }
 
+func countOccurances(arr []int) map[int]int {
+	freq := make(map[int]int)
+
+	for _, num := range arr {
+		freq[num]++
+	}
+
+	return freq
+}
+
+func computeSimilarity(arr []int, m map[int]int) int {
+	similarity := 0
+
+	for _, elem := range arr {
+		similarity = similarity + elem*m[elem]
+	}
+
+	return similarity
+
+}
+
 func main() {
 	lines := readInput()
 	left, right := separateLocationIds(lines)
 	sort.Ints(left)
 	sort.Ints(right)
 	distance := computeDistance(left, right)
+	fmt.Println("Part 1:")
 	fmt.Printf("Total distance: %d\n", distance)
+	fmt.Println("-----------------------------------")
+	fmt.Println("Part 2:")
+	occurances := countOccurances(right)
+	similarity := computeSimilarity(left, occurances)
+	fmt.Printf("Similarity score: %d\n", similarity)
 }
