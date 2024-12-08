@@ -72,15 +72,11 @@ func isStrictlyMonotonic(row []int, increasing bool) bool {
 	return true
 }
 
-func isSafe(line string) (int, error) {
-	convertedLine, err := convertToInt(line)
-	if err != nil {
-		return 0, err
+func isSafe(line []int) (bool, error) {
+	if (isStrictlyMonotonic(line, true) || isStrictlyMonotonic(line, false)) && areNotTooFarApart(line) {
+		return true, nil
 	}
-	if (isStrictlyMonotonic(convertedLine, true) || isStrictlyMonotonic(convertedLine, false)) && areNotTooFarApart(convertedLine) {
-		return 1, nil
-	}
-	return 0, nil
+	return false, nil
 }
 
 func main() {
@@ -91,12 +87,33 @@ func main() {
 
 	result := 0
 	for _, line := range lines {
-		isSafeVal, err := isSafe(line)
+		convertedLine, err := convertToInt(line)
+		if err != nil {
+			log.Fatalf("Failed to convert line \"%s\": %v\n", line, err)
+		}
+		isSafeVal, err := isSafe(convertedLine)
 		if err != nil {
 			log.Printf("Error processing line '%s': %v\n", line, err)
 			continue
 		}
-		result += isSafeVal
+		if isSafeVal {
+			result += 1
+		} else { // This implements part II
+			for i := 0; i < len(convertedLine); i++ {
+				tmp := append([]int{}, convertedLine[:i]...)
+				tmp = append(tmp, convertedLine[i+1:]...)
+
+				isSafeVal, err = isSafe(tmp)
+				if err != nil {
+					log.Printf("Error processing modified line '%v': %v\n", tmp, err)
+					continue
+				}
+				if isSafeVal {
+					result += 1
+					break // No need to check further if a safe version is found
+				}
+			}
+		}
 	}
 
 	fmt.Printf("Number of safe lines: %d\n", result)
